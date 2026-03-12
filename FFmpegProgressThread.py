@@ -17,6 +17,8 @@ class FFmpegProgressThread(QThread):
 		
 	def run(self):
 		try:
+			all_stderr_outputs = {}
+			
 			for i, command in enumerate(self.commands) :
 				print("executing\n", " ".join(command))
 				self.command_process_updated.emit(i)
@@ -32,10 +34,15 @@ class FFmpegProgressThread(QThread):
 				time_pattern = re.compile(r'time=(\d{2}):(\d{2}):(\d{2})\.(\d{2})')
 				duration_pattern = re.compile(r'Duration: (\d{2}):(\d{2}):(\d{2})\.(\d{2})')
 				
+				stderr_output = []
+				all_stderr_outputs[i] = stderr_output
+				
 				while True:
 					line = self.process.stderr.readline()
 					if not line and self.process.poll() is not None:
 						break
+						
+					stderr_output.append(line)
 						
 					if duration is None:
 						duration_match = duration_pattern.search(line)
@@ -49,18 +56,23 @@ class FFmpegProgressThread(QThread):
 						h, m, s, ms = map(int, time_match.groups())
 						current_time = h * 3600 + m * 60 + s + ms/100
 						progress = int((current_time / self.total_duration) * 100)
-						progress = min(progress, 100)  # Cap at 100%
+						progress = min(progress, 100)
 						self.progress_updated.emit(progress)
 						
 				return_code = self.process.wait()
 				print("finished command")
 				
-			
+				if return_code != 0:
+					error_output = ''.join(stderr_output)
+					print(f"Error in command {i} (code {return_code}):\n{error_output}")
+				
 			if return_code == 0:
 				self.progress_updated.emit(100)
 				self.encoding_finished.emit(True, "Encoding completed successfully")
 			else:
-				self.encoding_finished.emit(False, f"Encoding failed with code {return_code}")
+				error_output = ''.join(stderr_output)
+				error_message = f"Encoding failed with code {return_code}\nError details:\n{error_output}"
+				self.encoding_finished.emit(False, error_message)
 				
 		except Exception as e:
 			self.encoding_finished.emit(False, str(e))
