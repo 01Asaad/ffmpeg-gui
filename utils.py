@@ -8,4 +8,4 @@ def notify(title, text, duration = 2) :
 
 def make_even(num : int) :
 	if num % 2 == 0 : return num
-	return num - 1 if num % 10 in (6, 1) else num + 1
+	return num - 1 if num % 10 == 1 else num + 1
