@@ -98,7 +98,7 @@ class VideoEncoder(QObject) :
 			"-map", "0:s?",
 			"-c:v", codec_value,
 			"-crf", settings.crf,
-			"-preset", settings.preset,
+			"-preset", settings.preset.value,
 			*MAXRATE,
 			"-c:a", "copy",
 			"-c:s", "copy",

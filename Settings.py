@@ -15,8 +15,21 @@ codec_names = {
 	"h265" : "libx265"
 }
 
+class Preset(StrEnum) :
+	ULTRAFAST = "ultrafast"
+	SUPERFAST = "superfast"
+	VERYFAST = "veryfast"
+	FASTER = "faster"
+	FAST = "fast"
+	MEDIUM = "medium"
+	SLOW = "slow"
+	SLOWER = "slower"
+	VERYSLOW = "veryslow"
+	PLACEBO = "placebo"
+
+
 class Settings :
-	def __init__(self, codec, vids, crf, convert_to_sdr, maxrate, max_fps, res, preset = "medium", destination = None) -> None:
+	def __init__(self, codec, vids, crf, convert_to_sdr, maxrate, max_fps, res, preset = Preset.MEDIUM, destination = None) -> None:
 		self.codec : Codecs = codec
 		self.destination = destination
 		self.vids : List[Video] = vids

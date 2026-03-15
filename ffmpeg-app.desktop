@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=FFmpeg App
+Comment=Python FFmpeg application
+Exec=/usr/bin/python3 /home/USERNAME/dev/ffmpeg1/app.py
+Icon=applications-multimedia
+Terminal=false
+Categories=Graphics;Multimedia;
+StartupNotify=true
