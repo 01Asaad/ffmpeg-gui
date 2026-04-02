@@ -7,6 +7,8 @@ from PySide6.QtWidgets import QWidget, QLabel, QHBoxLayout, QPushButton
 
 from pathlib import Path
 
+from utils import calculate_aspect_ratio
+
 class Video :
 	def __init__(self, path : str | Path) -> None:
 		self.path = Path(path)
@@ -38,7 +40,7 @@ class Video :
 		vstream = next((stream for stream in self.data["streams"] if stream["codec_type"] == "video"))
 		self.video_codec = vstream["codec_name"]
 		self.resolution = vstream["width"], vstream["height"]
-		self.aspect_ratio = vstream["display_aspect_ratio"].split(":")
+		self.aspect_ratio = vstream["display_aspect_ratio"].split(":") if "display_aspect_ratio" in vstream else calculate_aspect_ratio(*self.resolution)
 		self.fps = vstream["r_frame_rate"]
 		
 				
