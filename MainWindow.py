@@ -22,6 +22,7 @@ class MainWindow(QMainWindow) :
 		self.current_processing_video = 0
 		self.setup_ui()
 		self.video_encoder = VideoEncoder.VideoEncoder(self.progress_bar, self.progress_label, self.video_list_wid)
+		self.command_preview_field.setText(self.video_encoder.get_command(Settings.from_mainwindow(self)))
 	def setup_ui(self) :
 		layout = QVBoxLayout()
 		self.main_layout = layout
@@ -45,12 +46,18 @@ class MainWindow(QMainWindow) :
 		settings_layout.addLayout(group_wids(QHBoxLayout, [self.codec_selection, self.start_button]))
 		self.codec_selection.setMaximumWidth(160)
 		self.codec_selection.addItems(["h264", "h265"])
+		self.codec_selection.currentIndexChanged.connect(self.settings_updated)
 		self.video_list_wid = VideoListWidget()
 		self.video_list_wid.input_videos.currentItemChanged.connect(self.selected_video_updated)
 		settings_layout.addWidget(self.video_list_wid)
 
 		self.text_field = QTextEdit("No video selected")
+		self.text_field.setReadOnly(True)
+		self.command_preview_field = QTextEdit()
+		self.command_preview_field.setReadOnly(True)
+		
 		video_data_layout.addWidget(self.text_field)
+		video_data_layout.addWidget(self.command_preview_field)
 
 		self.crf_label = QLabel("CRF")
 		settings_layout.addWidget(self.crf_label)
@@ -59,17 +66,24 @@ class MainWindow(QMainWindow) :
 		self.crf_input = QSpinBox(maximum=100, singleStep=1, minimum=0)
 		self.crf_input.valueChanged.connect(lambda x : self.crf_slider.setValue(x))
 		self.crf_slider.valueChanged.connect(lambda x : self.crf_input.setValue(x))
+
+		self.crf_input.setValue(23)
+
+		self.crf_slider.valueChanged.connect(self.settings_updated)
 		
 		settings_layout.addLayout(group_wids(QHBoxLayout, [self.crf_slider, self.crf_input]))
 
 		self.convert_to_sdr_checkbox = QCheckBox("Convert to SDR")
+		self.convert_to_sdr_checkbox.checkStateChanged.connect(self.settings_updated)
 		settings_layout.addWidget(self.convert_to_sdr_checkbox)
 
 		self.maxrate_input = QLineEdit(inputMask=None)
+		self.maxrate_input.textChanged.connect(self.settings_updated)
 		self.maxrate_box = OptionalArg("maxrate", [self.maxrate_input])
 		settings_layout.addWidget(self.maxrate_box)
 
 		self.maxFPS_input = QLineEdit(inputMask=None)
+		self.maxFPS_input.textChanged.connect(self.settings_updated)
 		self.max_fps_box = OptionalArg("Max FPS", [self.maxFPS_input])
 		settings_layout.addWidget(self.max_fps_box)
 		
@@ -84,6 +98,8 @@ class MainWindow(QMainWindow) :
 		if self.video_list_wid.input_videos.count() == 0 : return True
 		start_aspect_ratio = next(self.video_list_wid.itemWids).video.aspect_ratio
 		return all(vidwid.video.aspect_ratio == start_aspect_ratio for vidwid in self.video_list_wid.itemWids)
+	def settings_updated(self) :
+		self.command_preview_field.setText(self.video_encoder.get_command(Settings.from_mainwindow(self)))
 	def selected_video_updated(self) :
 		current_item = self.video_list_wid.input_videos.currentItem()
 		self.text_field.setText(self.video_list_wid.input_videos.itemWidget(current_item).video.get_description() if current_item else "No video selected")

@@ -10,7 +10,7 @@ from pathlib import Path
 from utils import calculate_aspect_ratio
 
 class Video :
-	def __init__(self, path : str | Path) -> None:
+	def __init__(self, path : str | Path, populate_video_info = True) -> None:
 		self.path = Path(path)
 		self.duration =None
 		self.bitrate = None
@@ -20,7 +20,7 @@ class Video :
 		self.aspect_ratio = None, None
 		self.size = None
 		self.data = None
-		self.populate()
+		if populate_video_info : self.populate()
 	def get_description(self) :
 		return "\n".join((str(i) for i in [
 			"duration : " + str(self.duration),

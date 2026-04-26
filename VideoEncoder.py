@@ -42,6 +42,8 @@ class VideoEncoder(QObject) :
 			self.progress_bar.setValue(0)
 			message = f"failed processing video{is_multiple}\n{th_message}"
 		notify("Video formatting finished", message, 10)
+	def get_command(self, settings : Settings) :
+		return " ".join(self.generate_command(Video("./input.mp4", False), settings))
 	def start_encoding(self, settings : Settings) :
 		if not settings.vids :
 			raise Exception("no videos to process")
