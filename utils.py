@@ -4,6 +4,9 @@ from __future__ import annotations
 import math
 import subprocess
 
+
+VIDEO_SUFFIXES = ("mp4", "mkv", "mov", "avi")
+
 def notify(title, text, duration = 2) :
 	subprocess.run(['notify-send', '-t', str(duration*1000), title, text])
 

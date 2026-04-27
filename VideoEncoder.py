@@ -43,14 +43,16 @@ class VideoEncoder(QObject) :
 			message = f"failed processing video{is_multiple}\n{th_message}"
 		notify("Video formatting finished", message, 10)
 	def get_command(self, settings : Settings) :
-		return " ".join(self.generate_command(Video("./input.mp4", False), settings))
+		return " ".join(((word if " " not in word else '"' + word + '"') for word in self.generate_command(Video("./input.mp4", False), settings)))
 	def start_encoding(self, settings : Settings) :
 		if not settings.vids :
 			raise Exception("no videos to process")
-		commands = []
+		commands : list[list[str]]= []
 		self.current_processing_video = 0
 		for video in settings.vids :
 			commands.append(self.generate_command(video, settings))
+			if settings.keep_file_date :
+				commands.append(["touch", "-r", str(video.path), str(self.get_destination(video, settings))])
 		self.ffmpeg_thread = FFmpegProgressThread(commands)
 		self.ffmpeg_thread.progress_updated.connect(self.update_progress)
 		self.ffmpeg_thread.command_process_updated.connect(self.update_video_running)
@@ -64,8 +66,10 @@ class VideoEncoder(QObject) :
 		if self.ffmpeg_thread and self.ffmpeg_thread.isRunning():
 			self.ffmpeg_thread.stop()
 			self.ffmpeg_thread.wait()
+	def get_destination(self, video : Video, settings: Settings) :
+		return (settings.destination if settings.destination else video.path.parent) / (video.path.name.split(".")[-2] + "_re." + video.path.name.split(".")[-1])
 	def generate_command(self, video: Video, settings: Settings) -> List[str]:
-		destination = (settings.destination if settings.destination else video.path.parent) / (video.path.name.split(".")[-2] + "_re." + video.path.name.split(".")[-1])
+		destination = self.get_destination(video, settings)
 		
 		filter_chain = []
 		

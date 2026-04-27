@@ -1,9 +1,10 @@
 import logging
+from pathlib import Path
 from typing import List
 
 import PySide6
 from PySide6.QtCore import QSize, Qt
-from PySide6.QtWidgets import (QCheckBox, QComboBox, QHBoxLayout, QLabel, QLineEdit,
+from PySide6.QtWidgets import (QCheckBox, QComboBox, QFileDialog, QHBoxLayout, QLabel, QLineEdit,
 							   QMainWindow, QProgressBar, QPushButton, QSpinBox,
 							   QVBoxLayout, QWidget, QSlider, QTextEdit)
 
@@ -18,7 +19,7 @@ class MainWindow(QMainWindow) :
 	def __init__(self) :
 		super().__init__()
 		self.setWindowTitle("Video Formatter")
-		self.resize(QSize(600,500))
+		self.resize(QSize(1280,720))
 		self.current_processing_video = 0
 		self.setup_ui()
 		self.video_encoder = VideoEncoder.VideoEncoder(self.progress_bar, self.progress_label, self.video_list_wid)
@@ -62,12 +63,12 @@ class MainWindow(QMainWindow) :
 		self.crf_label = QLabel("CRF")
 		settings_layout.addWidget(self.crf_label)
 		self.crf_slider = QSlider(Qt.Orientation.Horizontal)
-		self.crf_slider.setRange(0, 100)
-		self.crf_input = QSpinBox(maximum=100, singleStep=1, minimum=0)
+		self.crf_slider.setRange(0, 51)
+		self.crf_input = QSpinBox(maximum=51, singleStep=1, minimum=0)
 		self.crf_input.valueChanged.connect(lambda x : self.crf_slider.setValue(x))
 		self.crf_slider.valueChanged.connect(lambda x : self.crf_input.setValue(x))
 
-		self.crf_input.setValue(23)
+		self.crf_input.setValue(19)
 
 		self.crf_slider.valueChanged.connect(self.settings_updated)
 		
@@ -87,12 +88,32 @@ class MainWindow(QMainWindow) :
 		self.max_fps_box = OptionalArg("Max FPS", [self.maxFPS_input])
 		settings_layout.addWidget(self.max_fps_box)
 		
+		# self.custom_output_dir = QCheckBox("Custom Output dir")
+		self.output_dir = QLineEdit(placeholderText="same as each video's path")
+		self.output_dir.textChanged.connect(self.settings_updated)
+		self.select_dir_button = QPushButton("select dir")
+		self.select_dir_button.clicked.connect(self.open_directory_dialog)
+		self.custom_output_dir = OptionalArg("Custom Output dir", [self.output_dir, self.select_dir_button])
+		settings_layout.addWidget(self.custom_output_dir)
+
 		self.res_widget = Resolution_Widget(self)
 		settings_layout.addWidget(self.res_widget)
+
+		self.keep_file_data_checkbox = QCheckBox("Keep video file modify and create date")
+		settings_layout.addWidget(self.keep_file_data_checkbox)
 		self.progress_label = QLabel("Idle")
 		layout.addWidget(self.progress_label)
 		self.progress_bar = QProgressBar()
 		layout.addWidget(self.progress_bar)
+	def open_directory_dialog(self):
+		file_dialog = QFileDialog(self)
+		directory_path = file_dialog.getExistingDirectory(
+			self, "Select Directory", "", QFileDialog.DontResolveSymlinks
+		)
+		directory_path = Path(directory_path)
+		self.output_dir.setText(str(directory_path))
+		return directory_path
+		
 	@property
 	def is_all_videos_same_aspect_ratio(self) :
 		if self.video_list_wid.input_videos.count() == 0 : return True

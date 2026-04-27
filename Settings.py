@@ -1,5 +1,6 @@
 from enum import StrEnum
-from typing import List, TYPE_CHECKING
+from pathlib import Path
+from typing import List, TYPE_CHECKING, Optional
 if TYPE_CHECKING :
 	from MainWindow import MainWindow
 from VideoListItemWidget import Video
@@ -29,9 +30,9 @@ class Preset(StrEnum) :
 
 
 class Settings :
-	def __init__(self, codec, vids, crf, convert_to_sdr, maxrate, max_fps, res, preset = Preset.MEDIUM, destination = None) -> None:
+	def __init__(self, codec, vids, crf, convert_to_sdr, maxrate, max_fps, res, preset = Preset.MEDIUM, destination = None, keep_file_date = False) -> None:
 		self.codec : Codecs = codec
-		self.destination = destination
+		self.destination : Optional[Path] = destination # a dir
 		self.vids : List[Video] = vids
 		self.crf = crf
 		self.convert_to_sdr : bool = convert_to_sdr
@@ -39,6 +40,7 @@ class Settings :
 		self.max_fps = max_fps
 		self.res = res
 		self.preset = preset
+		self.keep_file_date = keep_file_date
 	@classmethod
 	def from_mainwindow(cls, window : MainWindow) :
 		codec = Codecs(window.codec_selection.currentText())
@@ -48,4 +50,6 @@ class Settings :
 		maxrate = window.maxrate_input.text() if window.maxrate_box.checkbox_wid.isChecked() else None
 		max_fps = window.maxFPS_input.text() if window.max_fps_box.checkbox_wid.isChecked() else None
 		res = (make_even(window.res_widget.width), make_even(window.res_widget.height)) if window.res_widget.custom_res else (None, None)
-		return Settings(codec, vids, crf,  convert_to_sdr, maxrate, max_fps, res)
+		destination = Path(window.output_dir.text()) if window.custom_output_dir.checkbox_wid.isChecked() else None
+		keep_file_date = window.keep_file_data_checkbox.isChecked()
+		return Settings(codec, vids, crf,  convert_to_sdr, maxrate, max_fps, res, destination=destination, keep_file_date=keep_file_date)
