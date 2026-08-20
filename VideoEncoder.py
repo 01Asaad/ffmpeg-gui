@@ -92,7 +92,7 @@ class VideoEncoder(QObject) :
 		
 		codec_value = codec_names[settings.codec.value]
 		
-		MAXRATE = ["-maxrate", settings.maxrate, "-bufsize", str(int(settings.maxrate[:-1]) * 2) + settings.maxrate[-1]] if settings.maxrate else []
+		MAXRATE = ["-maxrate", settings.maxrate + settings.maxrate_unit.value, "-bufsize", settings.maxrate*2 + settings.maxrate_unit.value] if settings.maxrate else []
 		
 		command = [
 			"ffmpeg",

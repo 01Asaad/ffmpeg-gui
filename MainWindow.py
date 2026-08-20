@@ -86,6 +86,7 @@ class MainWindow(QMainWindow) :
 		self.maxFPS_input = QLineEdit(inputMask=None)
 		self.maxFPS_input.textChanged.connect(self.settings_updated)
 		self.max_fps_box = OptionalArg("Max FPS", [self.maxFPS_input])
+		self.max_fps_box.checkbox_wid.clicked.connect(self.settings_updated)
 		settings_layout.addWidget(self.max_fps_box)
 		
 		# self.custom_output_dir = QCheckBox("Custom Output dir")

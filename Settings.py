@@ -27,7 +27,11 @@ class Preset(StrEnum) :
 	SLOWER = "slower"
 	VERYSLOW = "veryslow"
 	PLACEBO = "placebo"
-
+class Units(StrEnum) :
+	B = "B"
+	K = "K"
+	M = "M"
+	G = "G"
 
 class Settings :
 	def __init__(self, codec, vids, crf, convert_to_sdr, maxrate, max_fps, res, preset = Preset.MEDIUM, destination = None, keep_file_date = False) -> None:
@@ -37,6 +41,7 @@ class Settings :
 		self.crf = crf
 		self.convert_to_sdr : bool = convert_to_sdr
 		self.maxrate = maxrate
+		self.maxrate_unit = Units.M
 		self.max_fps = max_fps
 		self.res = res
 		self.preset = preset
